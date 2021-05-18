@@ -1,4 +1,12 @@
-import {gql, useQuery} from "@apollo/client";
+import {
+  ApolloClient,
+  createHttpLink,
+  gql,
+  InMemoryCache,
+  NormalizedCacheObject,
+  useQuery
+} from "@apollo/client";
+import {setContext} from "@apollo/client/link/context";
 
 export interface Repository {
   name: string;
@@ -64,7 +72,7 @@ export const useReposQuery = (searchTerm: string) => {
   const keyword = searchTerm.trim();
   const query = keyword ? `${keyword} sort:stars` : '';
 
-  const { data, loading, error } = useQuery<ReposData, ReposQueryVars>(GetReposGql, {
+  const {data, loading, error} = useQuery<ReposData, ReposQueryVars>(GetReposGql, {
     variables: {
       query,
       first: 10
@@ -77,4 +85,35 @@ export const useReposQuery = (searchTerm: string) => {
     loading,
     data: transformData(data)
   }
+}
+
+export const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
+
+let apolloClient: ApolloClient<NormalizedCacheObject> | undefined;
+
+// return the existing Apollo Client or create one if it doesn't exist
+export const getApolloClient = () => {
+  if (apolloClient) {
+    return apolloClient;
+  }
+
+  const authLink = setContext((_, {headers}) => ({
+      headers: {
+        ...headers,
+        authorization: GITHUB_TOKEN ? `Bearer ${GITHUB_TOKEN}` : "",
+      }
+    }
+  ));
+
+  const httpLink = createHttpLink({
+    uri: 'https://api.github.com/graphql',
+  });
+
+
+  apolloClient = new ApolloClient({
+    link: authLink.concat(httpLink),
+    cache: new InMemoryCache()
+  });
+
+  return apolloClient;
 }

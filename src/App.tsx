@@ -1,11 +1,9 @@
-import {setContext} from "@apollo/client/link/context";
 import React, {useEffect, useRef, useState} from 'react';
-import {ApolloClient, createHttpLink, InMemoryCache} from '@apollo/client'
 import {ApolloProvider} from '@apollo/client/react';
 
 import './App.css';
 
-import {Repository, useReposQuery} from "./utils";
+import {getApolloClient, GITHUB_TOKEN, Repository, useReposQuery} from "./utils";
 import * as text from './text.json'
 
 interface HeaderProps {
@@ -45,25 +43,6 @@ const RepoList = ({repos}: RepoListProps) => {
 interface FilteredRepoListProps {
   searchTerm: string
 }
-
-const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
-
-const authLink = setContext((_, {headers}) => ({
-    headers: {
-      ...headers,
-      authorization: GITHUB_TOKEN ? `Bearer ${GITHUB_TOKEN}` : "",
-    }
-  }
-));
-
-const httpLink = createHttpLink({
-  uri: 'https://api.github.com/graphql',
-});
-
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
-});
 
 const FilteredRepoList = ({searchTerm}: FilteredRepoListProps) => {
   const {loading, error, data} = useReposQuery(searchTerm)
@@ -111,7 +90,7 @@ const App = () => {
   }
 
   return (
-    <ApolloProvider client={client}>
+    <ApolloProvider client={getApolloClient()}>
       <div className="App">
         <Header title={text.HEADER}/>
         <main className="App-content">
