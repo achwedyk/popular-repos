@@ -54,6 +54,23 @@ yarn test
 
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+### Build and run for production with Docker
+
+Build the app with
+
+```
+docker build . -t achwedyk/popular-repos --build-arg GITHUB_TOKEN_ARG='YOUR_GENERATED_TOKEN_HERE'
+```
+
+Run with
+
+```
+docker run -p 8080:80 achwedyk/popular-repos
+```
+
+The app should be available on [http://localhost:8080](http://localhost:8080).
+
 ## Learn More
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
