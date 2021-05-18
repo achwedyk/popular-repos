@@ -51,7 +51,7 @@ const transformData = (data?: ReposData): Array<Repository> => {
   })
 }
 
-const GetReposGql = gql`
+export const GetReposQuery = gql`
   query GetRepos($query: String!, $first: Int!) {
     search(query: $query, type: REPOSITORY, first: $first) {
       edges {
@@ -72,7 +72,7 @@ export const useReposQuery = (searchTerm: string) => {
   const keyword = searchTerm.trim();
   const query = keyword ? `${keyword} sort:stars` : '';
 
-  const {data, loading, error} = useQuery<ReposData, ReposQueryVars>(GetReposGql, {
+  const {data, loading, error} = useQuery<ReposData, ReposQueryVars>(GetReposQuery, {
     variables: {
       query,
       first: 10
@@ -87,7 +87,8 @@ export const useReposQuery = (searchTerm: string) => {
   }
 }
 
-export const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
+// for unit tests provide the mock token
+export const GITHUB_TOKEN = process.env.NODE_ENV === 'test' ? 'MOCK_TOKEN' : process.env.REACT_APP_GITHUB_TOKEN;
 
 let apolloClient: ApolloClient<NormalizedCacheObject> | undefined;
 
