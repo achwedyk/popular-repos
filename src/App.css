@@ -6,25 +6,9 @@
   height: 100vh;
 }
 
-.App-header {
-  background-color: #55cbcd;
-  min-height: 10vh;
-  max-height: 20vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(12px + 2vmin);
-  color: black;
-}
-
 .App-content {
   flex: 1;
   background-color: #d4f0f0;
-}
-
-.Message {
-  margin: 16px;
 }
 
 .SearchBox {
