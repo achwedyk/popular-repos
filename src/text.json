@@ -1,0 +1,13 @@
+{
+  "ERROR": "There was an error",
+  "FILTER": "Search keyword:",
+  "HEADER": "Popular Repos",
+  "LOADING": "Searching...",
+  "NO_RESULTS": "No results found",
+  "COLUMNS": {
+    "FORKS": "Forks",
+    "NAME": "Name",
+    "STARS": "Stars",
+    "URL": "URL"
+  }
+}
