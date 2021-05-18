@@ -46,6 +46,7 @@
 
 .RepoList-Item {
   margin: 0;
+  list-style: none;
 }
 
 .RepoList-Item + .RepoList-Item {

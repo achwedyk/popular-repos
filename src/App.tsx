@@ -1,86 +1,15 @@
-import React, {useEffect, useRef, useState} from 'react';
 import {ApolloProvider} from '@apollo/client/react';
+import React, {useState} from 'react';
 
-import './App.css';
+import 'src/App.css';
 
-import {getApolloClient, GITHUB_TOKEN, Repository, useReposQuery} from "./utils";
-import * as text from './text.json'
+import {Header} from 'src/components/Header';
+import {Message} from 'src/components/Message';
+import {FilteredRepoList} from 'src/components/RepoList';
+import {SearchBox} from 'src/components/SearchBox';
 
-interface HeaderProps {
-  title: string
-}
-
-const Header = ({title}: HeaderProps) => <header className="App-header">{title}</header>
-
-interface MessageProps {
-  label: string
-}
-
-const Message = ({label}: MessageProps) => <div className="Message">{label}</div>
-
-const RepoListItem = ({name, url, stars, forks}: Repository) => (
-  <li className="RepoList-Item">
-    <a href={url}>{name}</a> - 🌟 {stars} - 🍴{forks}
-  </li>
-)
-
-interface RepoListProps {
-  repos: Array<Repository>
-}
-
-const RepoList = ({repos}: RepoListProps) => {
-  if (repos.length === 0) {
-    return <Message label={text.NO_RESULTS}/>
-  }
-
-  return <div className="RepoList">
-    {repos.map((repo) =>
-      <RepoListItem key={repo.name} {...repo}/>
-    )}
-  </div>
-}
-
-interface FilteredRepoListProps {
-  searchTerm: string
-}
-
-const FilteredRepoList = ({searchTerm}: FilteredRepoListProps) => {
-  const {loading, error, data} = useReposQuery(searchTerm)
-
-  if (loading) {
-    return <Message label={text.LOADING}/>;
-  }
-
-  if (error) {
-    return <Message label={text.ERROR}/>;
-  }
-
-  return <RepoList repos={data}/>
-}
-
-interface SearchBoxProps {
-  value: string;
-  onChange: (value: string) => void;
-}
-
-const SearchBox = ({onChange, value}: SearchBoxProps) => {
-  const inputEl = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (inputEl && inputEl.current) {
-      inputEl.current.select()
-    }
-  }, [inputEl])
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value)
-  }
-
-  return <div className="SearchBox">
-    <label className="SearchBox-label">{text.FILTER}</label>
-    <input className="SearchBox-input" ref={inputEl} autoFocus={true} value={value} onChange={handleChange}/>
-  </div>
-}
+import {getApolloClient, GITHUB_TOKEN} from './utils';
+import * as text from 'src/text.json'
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState<string>('react')
