@@ -1,29 +1,12 @@
 import {setContext} from "@apollo/client/link/context";
 import React, {useEffect, useRef, useState} from 'react';
-import {ApolloClient, createHttpLink, gql, InMemoryCache, useQuery} from '@apollo/client'
+import {ApolloClient, createHttpLink, InMemoryCache} from '@apollo/client'
 import {ApolloProvider} from '@apollo/client/react';
 
 import './App.css';
 
-import {Repository} from "./utils";
+import {Repository, useReposQuery} from "./utils";
 import * as text from './text.json'
-
-const GetReposGql = gql`
-  query GetRepos($query: String!, $first: Int!) {
-    search(query: $query, type: REPOSITORY, first: $first) {
-      edges {
-        node {
-          ... on Repository {
-            nameWithOwner
-            url
-            stargazerCount
-            forkCount
-          }
-        }
-      }
-    }
-  }
-`;
 
 interface HeaderProps {
   title: string
@@ -63,22 +46,6 @@ interface FilteredRepoListProps {
   searchTerm: string
 }
 
-const transformData = (data: any): Array<Repository> => {
-  if (!data) {
-    return []
-  }
-
-  return data.search.edges.map((edge: any) => {
-    const {node} = edge
-    return {
-      name: node.nameWithOwner,
-      url: node.url,
-      stars: node.stargazerCount,
-      forks: node.forkCount
-    }
-  })
-}
-
 const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
 
 const authLink = setContext((_, {headers}) => ({
@@ -99,13 +66,7 @@ const client = new ApolloClient({
 });
 
 const FilteredRepoList = ({searchTerm}: FilteredRepoListProps) => {
-  const {loading, error, data} = useQuery(GetReposGql, {
-    variables: {
-      query: `${searchTerm} sort:stars`,
-      first: 10
-    },
-    skip: !searchTerm
-  })
+  const {loading, error, data} = useReposQuery(searchTerm)
 
   if (loading) {
     return <Message label={text.LOADING}/>;
@@ -115,8 +76,7 @@ const FilteredRepoList = ({searchTerm}: FilteredRepoListProps) => {
     return <Message label={text.ERROR}/>;
   }
 
-  const repos = transformData(data);
-  return <RepoList repos={repos}/>
+  return <RepoList repos={data}/>
 }
 
 interface SearchBoxProps {
