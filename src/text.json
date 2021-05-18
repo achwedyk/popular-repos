@@ -1,13 +1,8 @@
 {
-  "ERROR": "There was an error",
+  "ERROR": "There was an error.",
   "FILTER": "Search keyword:",
   "HEADER": "Popular Repos",
   "LOADING": "Searching...",
-  "NO_RESULTS": "No results found",
-  "COLUMNS": {
-    "FORKS": "Forks",
-    "NAME": "Name",
-    "STARS": "Stars",
-    "URL": "URL"
-  }
+  "NO_RESULTS": "No results found.",
+  "TOKEN_MISSING": "GitHub token is not defined. Refer to the documentation for the setup instructions."
 }

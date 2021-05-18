@@ -25,6 +25,10 @@
 
 /* Extract */
 
+.Message {
+  margin: 16px;
+}
+
 .SearchBox {
   background-color: #a2e1db;
   padding: 16px;

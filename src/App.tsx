@@ -1,15 +1,41 @@
+import {setContext} from "@apollo/client/link/context";
 import React, {useEffect, useRef, useState} from 'react';
-import {fetchRepos, Repository} from "./utils";
+import {ApolloClient, createHttpLink, gql, InMemoryCache, useQuery} from '@apollo/client'
+import {ApolloProvider} from '@apollo/client/react';
 
 import './App.css';
 
+import {Repository} from "./utils";
 import * as text from './text.json'
+
+const GetReposGql = gql`
+  query GetRepos($query: String!, $first: Int!) {
+    search(query: $query, type: REPOSITORY, first: $first) {
+      edges {
+        node {
+          ... on Repository {
+            nameWithOwner
+            url
+            stargazerCount
+            forkCount
+          }
+        }
+      }
+    }
+  }
+`;
 
 interface HeaderProps {
   title: string
 }
 
 const Header = ({title}: HeaderProps) => <header className="App-header">{title}</header>
+
+interface MessageProps {
+  label: string
+}
+
+const Message = ({label}: MessageProps) => <div className="Message">{label}</div>
 
 const RepoListItem = ({name, url, stars, forks}: Repository) => (
   <li className="RepoList-Item">
@@ -21,25 +47,75 @@ interface RepoListProps {
   repos: Array<Repository>
 }
 
-const RepoList = ({repos}: RepoListProps) => (
-  <div className="RepoList">
+const RepoList = ({repos}: RepoListProps) => {
+  if (repos.length === 0) {
+    return <Message label={text.NO_RESULTS}/>
+  }
+
+  return <div className="RepoList">
     {repos.map((repo) =>
       <RepoListItem key={repo.name} {...repo}/>
     )}
   </div>
-)
+}
 
 interface FilteredRepoListProps {
   searchTerm: string
 }
 
+const transformData = (data: any): Array<Repository> => {
+  if (!data) {
+    return []
+  }
+
+  return data.search.edges.map((edge: any) => {
+    const {node} = edge
+    return {
+      name: node.nameWithOwner,
+      url: node.url,
+      stars: node.stargazerCount,
+      forks: node.forkCount
+    }
+  })
+}
+
+const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
+
+const authLink = setContext((_, {headers}) => ({
+    headers: {
+      ...headers,
+      authorization: GITHUB_TOKEN ? `Bearer ${GITHUB_TOKEN}` : "",
+    }
+  }
+));
+
+const httpLink = createHttpLink({
+  uri: 'https://api.github.com/graphql',
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
+});
+
 const FilteredRepoList = ({searchTerm}: FilteredRepoListProps) => {
-  const [repos, setRepos] = useState<Array<Repository>>([])
+  const {loading, error, data} = useQuery(GetReposGql, {
+    variables: {
+      query: `${searchTerm} sort:stars`,
+      first: 10
+    },
+    skip: !searchTerm
+  })
 
-  useEffect(() => {
-    setRepos(fetchRepos(searchTerm))
-  }, [searchTerm])
+  if (loading) {
+    return <Message label={text.LOADING}/>;
+  }
 
+  if (error) {
+    return <Message label={text.ERROR}/>;
+  }
+
+  const repos = transformData(data);
   return <RepoList repos={repos}/>
 }
 
@@ -70,14 +146,20 @@ const SearchBox = ({onChange, value}: SearchBoxProps) => {
 const App = () => {
   const [searchTerm, setSearchTerm] = useState<string>('react')
 
+  if (!GITHUB_TOKEN) {
+    return <Message label={text.TOKEN_MISSING}/>
+  }
+
   return (
-    <div className="App">
-      <Header title={text.HEADER}/>
-      <main className="App-content">
-        <SearchBox value={searchTerm} onChange={value => setSearchTerm(value)}/>
-        <FilteredRepoList searchTerm={searchTerm}/>
-      </main>
-    </div>
+    <ApolloProvider client={client}>
+      <div className="App">
+        <Header title={text.HEADER}/>
+        <main className="App-content">
+          <SearchBox value={searchTerm} onChange={value => setSearchTerm(value)}/>
+          <FilteredRepoList searchTerm={searchTerm}/>
+        </main>
+      </div>
+    </ApolloProvider>
   );
 }
 
