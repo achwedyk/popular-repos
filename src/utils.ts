@@ -5,8 +5,8 @@ import {
   InMemoryCache,
   NormalizedCacheObject,
   useQuery
-} from "@apollo/client";
-import {setContext} from "@apollo/client/link/context";
+} from '@apollo/client';
+import {setContext} from '@apollo/client/link/context';
 
 export interface Repository {
   name: string;
@@ -101,7 +101,7 @@ export const getApolloClient = () => {
   const authLink = setContext((_, {headers}) => ({
       headers: {
         ...headers,
-        authorization: GITHUB_TOKEN ? `Bearer ${GITHUB_TOKEN}` : "",
+        authorization: GITHUB_TOKEN ? `Bearer ${GITHUB_TOKEN}` : '',
       }
     }
   ));

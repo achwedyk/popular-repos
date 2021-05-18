@@ -1,12 +1,12 @@
 import React from 'react';
 import * as apolloClient from '@apollo/client';
-import { render, screen } from '@testing-library/react';
-import {GetReposQuery} from "./utils";
+import {render, screen} from '@testing-library/react';
+import {GetReposQuery} from './utils';
 import App from './App';
 
 describe('visual components', () => {
   beforeEach(() => {
-    render(<App />);
+    render(<App/>);
   })
 
   it('renders the header', () => {
@@ -27,11 +27,11 @@ describe('visual components', () => {
   })
 })
 
-describe('querying data',  () => {
+describe('querying data', () => {
   it('fetches the repos data for the default keyword', () => {
     const querySpy = jest.spyOn(apolloClient, 'useQuery');
 
-    render(<App />);
+    render(<App/>);
 
     expect(querySpy).toHaveBeenCalledWith(
       GetReposQuery,
